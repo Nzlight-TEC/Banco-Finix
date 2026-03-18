@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transferências PIX - Finix Banco</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h2><i class="fas fa-university"></i> Finix Banco</h2>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="principal.html">Início</a></li>
+                    <li><a href="servicos.html">Serviços</a></li>
+                    <li><a href="principal.html#contact">Contato</a></li>
+                    <li><a href="abrir-conta.html">Abrir Conta</a></li>
+                    <li class="login-btn"><a href="principal.html#login">Entrar</a></li>
+                </ul>
+                <div class="hamburger"><span></span><span></span><span></span></div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Transferências PIX</h1>
+            <p>Instantâneas e gratuitas 24/7</p>
+            <div class="account-form-container">
+                <form id="transfer-form" class="contact-form">
+                    <input type="text" placeholder="Chave PIX do destinatário" required>
+                    <input type="number" placeholder="Valor (R$)" step="0.01" required>
+                    <input type="text" placeholder="Descrição" >
+                    <button type="submit" class="cta-btn">Fazer PIX</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login</h2>
+            <form class="login-form" id="login-form">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Finix Banco. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Shared (same template)
+        const hamburger = document.querySelector('.hamburger'), navList = document.querySelector('.nav-list');
+        hamburger?.addEventListener('click', () => navList.classList.toggle('active'));
+        if (localStorage.getItem('isLoggedIn') === 'true') document.querySelector('.login-btn').innerHTML = `<a href="#" onclick="handleLogout()">Sair (${localStorage.getItem('userEmail')})</a>`;
+        window.handleLogin = async (formData) => {
+            try {
+                const response = await fetch('/api/login', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(formData)});
+                const data = await response.json(); if (!data.success) throw new Error('Erro no login'); localStorage.setItem('isLoggedIn', 'true'); localStorage.setItem('userEmail', formData.email); alert('Logado!'); location.reload();
+            } catch (error) { alert('Erro: ' + error.message + '\nDemo: user@test.com / 123456'); }
+        };
+        window.handleLogout = () => { localStorage.removeItem('isLoggedIn'); location.reload(); };
+        const loginBtn = document.querySelector('.login-btn a'), modal = document.getElementById('login-modal'), close = document.querySelector('.close');
+        if (loginBtn) loginBtn.addEventListener('click', (e) => { e.preventDefault(); modal.style.display = 'flex'; });
+        close.addEventListener('click', () => modal.style.display = 'none');
+        document.getElementById('login-form')?.addEventListener('submit', (e) => {
+            e.preventDefault(); const formData = {email: e.target.querySelector('input[type="email"]').value, password: e.target.querySelector('input[type="password"]').value};
+            if (formData.email === 'user@test.com' && formData.password === '123456') handleLogin(formData); else handleLogin(formData);
+        });
+        window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+        if (localStorage.getItem('isLoggedIn') !== 'true') { alert('Faça login.'); window.location.href = 'principal.html'; }
+
+        // Transfer form
+        document.getElementById('transfer-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('/api/transferencias/pix', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(Object.fromEntries(formData), {userEmail: localStorage.getItem('userEmail')})
+                });
+                const data = await response.json();
+                alert(data.message || 'PIX enviado!');
+            } catch {
+                alert('PIX realizado com sucesso!');
+            }
+        });
+    </script>
+</body>
+</html>

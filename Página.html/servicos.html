@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finix Banco - Nossos Serviços</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h2><i class="fas fa-university"></i> Finix Banco</h2>
+            </div>
+            <nav class="nav">
+                <ul class="nav-list">
+                    <li><a href="principal.html#home">Início</a></li>
+                    <li><a href="#services">Serviços</a></li>
+                    <li><a href="principal.html#contact">Contato</a></li>
+                    <li><a href="abrir-conta.html">Abrir Conta</a></li>
+                <li class="login-btn"><a href="#login">Entrar</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>Nossos Serviços</h1>
+            <p>Conheça todos os nossos produtos e serviços financeiros</p>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <h2>Todos os Serviços</h2>
+            <div id="services-grid" class="services-grid">
+                <!-- Services loaded dynamically from data.json -->
+                <div class="loading">Carregando serviços...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Finix Banco. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile nav toggle + login state
+        const hamburger = document.querySelector('.hamburger');
+        const navList = document.querySelector('.nav-list');
+        hamburger?.addEventListener('click', () => {
+            navList.classList.toggle('active');
+        });
+
+        // Check login state for nav
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            document.querySelector('.login-btn').innerHTML = `<a href="#" onclick="handleLogout()">Dashboard</a>`;
+        }
+
+        window.handleLogout = () => {
+            localStorage.removeItem('isLoggedIn');
+            location.reload();
+        };
+
+        // Load services from database/API
+        async function loadServices() {
+            const grid = document.getElementById('services-grid');
+            const loading = grid.querySelector('.loading');
+            
+            try {
+                // Future DB endpoint - user will replace with real DB
+                const response = await fetch('data.json');
+                const services = await response.json();
+                
+                grid.innerHTML = services.map(service => `
+                    <div class="service-card">
+                        <i class="fas fa-${service.icon}"></i>
+                        <h3>${service.title}</h3>
+                        <p>${service.description}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                // Fallback static services if DB not ready
+                grid.innerHTML = `
+                    <div class="service-card">
+                        <i class="fas fa-credit-card"></i>
+                        <h3>Conta Corrente</h3>
+                        <p>Bancário do dia a dia sem taxas e acesso fácil.</p>
+                        <a href="conta-corrente.html" class="service-btn">Acessar</a>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-piggy-bank"></i>
+                        <h3>Conta Poupança</h3>
+                        <p>Cresça seu dinheiro com taxas de juros competitivas.</p>
+                        <a href="poupanca.html" class="service-btn">Acessar</a>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <h3>Empréstimos</h3>
+                        <p>Rápido para empréstimos pessoais e para casas.</p>
+                        <a href="emprestimos.html" class="service-btn">Simular</a>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-credit-card"></i>
+                        <h3>Cartões de Crédito</h3>
+                        <p>Recompensas e cashback em toda compra.</p>
+                        <a href="cartoes.html" class="service-btn">Solicitar</a>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-exchange-alt"></i>
+                        <h3>Transferências</h3>
+                        <p>Transferências instantâneas PIX 24/7.</p>
+                        <a href="transferencias.html" class="service-btn">Transferir</a>
+                    </div>
+                    <div class="service-card">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>App Mobile</h3>
+                        <p>Banking completo no seu celular.</p>
+                        <a href="app-mobile.html" class="service-btn">Baixar</a>
+                    </div>
+                `;
+            }
+        }
+
+        // Load on page ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadServices);
+        } else {
+            loadServices();
+        }
+    </script>
+</body>
+</html>
